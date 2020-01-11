@@ -1,6 +1,12 @@
 ﻿using System;
 using System.IO;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Text;
+using System.Text.Json;
+using System.Threading.Tasks;
 using NAudio.Wave;
+using OggVorbisEncoder;
 
 namespace SynAdor
 {
@@ -8,6 +14,17 @@ namespace SynAdor
     {
         private const int MAX_TITLE_LENGTH = 30;
         private static WaveFileWriter writer;
+
+        /// <summary>
+        /// Получаем по https://console.cloud.yandex.ru/folders
+        /// </summary>
+        private static string _folderId;
+
+        /// <summary>
+        /// Получаем через https://cloud.yandex.ru/docs/iam/operations/iam-token/create
+        /// Там ссылка.
+        /// </summary>
+        private static string _apiToken;
 
         static void Main(string[] args)
         {
@@ -56,11 +73,68 @@ namespace SynAdor
                 }
             };
 
-            waveIn.RecordingStopped += (s, a) =>
+            waveIn.RecordingStopped += async (s, a) =>
             {
                 writer?.Dispose();
                 writer = null;
+
+                await RecognizeAsync();
             };
+        }
+
+        private static async Task RecognizeAsync()
+        {
+            var token = string.Empty;
+            using (var client = new HttpClient())
+            {
+                var url = "https://iam.api.cloud.yandex.net/iam/v1/tokens";
+
+                var content = new StringContent("{\"yandexPassportOauthToken\":\"{" + _apiToken + "}\"}", System.Text.Encoding.UTF8, "application/json");
+                var result = client.PostAsync(url, content).Result;
+
+                var resStr = await result.Content.ReadAsStringAsync();
+
+                var options = new JsonSerializerOptions
+                {
+                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                    WriteIndented = true
+                };
+
+                var a = JsonSerializer.Deserialize<AuthResult>(resStr, options);
+
+                token = a.iamToken;
+            }
+
+            using (var client = new HttpClient())
+            {
+                var url = $"https://stt.api.cloud.yandex.net/speech/v1/stt:recognize?topic=general&folderId={_folderId}";
+
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+                client.DefaultRequestHeaders.TransferEncodingChunked = true;
+
+                ConvertAudioResult();
+
+                var data = File.ReadAllBytes("res.ogg");
+
+                var audioContent = new ByteArrayContent(data);
+
+                var result = await client.PostAsync(url, audioContent);
+
+                var resultStr = await result.Content.ReadAsStringAsync();
+
+                Console.WriteLine(resultStr);
+            }
+        }
+
+        private static void ConvertAudioResult()
+        {
+            var pcmBytes = File.ReadAllBytes("res.wav");
+            var oggBytes = ConvertRawPCMFile(44100, 2, pcmBytes, PCMSample.SixteenBit, 44100, 2);
+            File.WriteAllBytes("res.ogg", oggBytes);
+        }
+
+        private class AuthResult {
+            public string iamToken { get; set; }
         }
 
         private static void FinishRecord(WaveInEvent waveIn)
