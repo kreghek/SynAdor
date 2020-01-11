@@ -1,17 +1,23 @@
 ﻿using System;
 using System.IO;
+using NAudio.Wave;
 
 namespace SynAdor
 {
     class Program
     {
         private const int MAX_TITLE_LENGTH = 30;
+        private static WaveFileWriter writer;
 
         static void Main(string[] args)
         {
             var adrRepositoryPath = "decisions";
 
             var templateFile = "template.md";
+
+            var waveIn = new WaveInEvent();
+
+            HandleWaveIn(waveIn);
 
             while (true)
             {
@@ -24,8 +30,48 @@ namespace SynAdor
                     case "CREATE":
                         ProcessCreation(templateFile, adrRepositoryPath);
                         break;
+
+                    case "S":
+                        StartRecord("res.wav", waveIn);
+                        break;
+                    case "F":
+                        FinishRecord(waveIn);
+                        break;
+
+                    case "Q":
+                    case "QUIT":
+                        return;
                 }
             }
+        }
+
+        private static void HandleWaveIn(WaveInEvent waveIn)
+        {
+            waveIn.DataAvailable += (s, a) =>
+            {
+                writer.Write(a.Buffer, 0, a.BytesRecorded);
+                if (writer.Position > waveIn.WaveFormat.AverageBytesPerSecond * 30)
+                {
+                    waveIn.StopRecording();
+                }
+            };
+
+            waveIn.RecordingStopped += (s, a) =>
+            {
+                writer?.Dispose();
+                writer = null;
+            };
+        }
+
+        private static void FinishRecord(WaveInEvent waveIn)
+        {
+            waveIn.StopRecording();
+        }
+
+        private static void StartRecord(string outputFilePath, WaveInEvent waveIn)
+        {
+            writer = new WaveFileWriter(outputFilePath, waveIn.WaveFormat);
+            waveIn.StartRecording();
         }
 
         private static void ProcessCreation(string templateFile, string adrRepositoryPath)

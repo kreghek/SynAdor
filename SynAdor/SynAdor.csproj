@@ -6,6 +6,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="NAudio" Version="1.9.0" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Update="template.md">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
