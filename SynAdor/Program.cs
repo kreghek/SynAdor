@@ -63,9 +63,9 @@ namespace SynAdor
                         break;
 
                     case "A":
-                    case "ACTUAL":
+                    case "ACCEPTED":
 
-                        ProcessReport(adrRepositoryPath);
+                        ProcessReport(adrRepositoryPath, onlyAccepted: true);
 
                         break;
 
@@ -76,7 +76,7 @@ namespace SynAdor
             }
         }
 
-        private static void ProcessReport(string adrRepositoryPath, bool onlyActual)
+        private static void ProcessReport(string adrRepositoryPath, bool onlyAccepted)
         {
             var adrFiles = Directory.GetFiles(adrRepositoryPath, "*.md");
 
@@ -95,6 +95,13 @@ namespace SynAdor
 
                 var fileContent = File.ReadAllText(adrFile);
                 var fileContentLines = fileContent.Split("\r\n", StringSplitOptions.RemoveEmptyEntries);
+
+                // Отфильтровываем только принятые (accepted)
+                var status = fileContentLines[2].Trim().ToUpperInvariant();
+                if (onlyAccepted && status != "ПРИНЯТО")
+                {
+                    continue;
+                }
 
                 var title = fileContentLines[0].TrimStart('#').Trim();
                 var anchor = title.ToLowerInvariant().Replace(" ", "-");
