@@ -160,7 +160,8 @@ namespace SynAdor
             var adrFiles = Directory.GetFiles(adrRepositoryPath, "*.md");
             var causeDecisionFile = AdrNameHelper.FindByNumber(adrFiles, causeDecisionNum);
 
-            content = content.Replace(status, $"Отменено (причина: [{causeDecisionNum:D4}](#{causeDecisionFile}))");
+            var causeDecisionFileTitle = causeDecisionFile.Replace("decisions\\", string.Empty);
+            content = content.Replace(status, $"Отменено (причина: [{causeDecisionFileTitle}]({causeDecisionFileTitle}))");
 
             File.WriteAllText(decisionFileName, content);
         }
