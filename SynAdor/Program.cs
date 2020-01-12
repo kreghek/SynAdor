@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 using System.IO;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -239,6 +240,8 @@ namespace SynAdor
             fileContent = fileContent.Replace("[$TITLE]", $"{decisionNum:D4}-{title}");
 
             fileContent = fileContent.Replace("[$STATUS]", "accepted");
+
+            fileContent = fileContent.Replace("[$CREATEDATE]", DateTime.Now.ToString("d", CultureInfo.GetCultureInfo("ru-RU")));
 
             Console.WriteLine("Context:");
             var context = Console.ReadLine();

@@ -6,6 +6,10 @@
 
 [0003-Номер решения в заголовке](#0003-номер-решения-в-заголовке)
 
+[0004-Дата создания решения](#0004-дата-создания-решения)
+
+[0005-Дата создания решения в русской культуре](#0005-дата-создания-решения-в-русской-культуре)
+
 
 
 # 0001-Использование ADR
@@ -15,6 +19,10 @@
 What is the status, such as proposed, accepted, rejected, deprecated, superseded, etc.?
 
 accepted
+
+## Дата создания
+
+12.01.2020
 
 ## Контекст
 
@@ -38,6 +46,10 @@ What is the status, such as proposed, accepted, rejected, deprecated, superseded
 
 accepted
 
+## Дата создания
+
+12.01.2020
+
 ## Контекст
 
 What is the issue that we're seeing that is motivating this decision or change?
@@ -60,6 +72,10 @@ What is the status, such as proposed, accepted, rejected, deprecated, superseded
 
 accepted
 
+## Дата создания
+
+12.01.2020
+
 ## Контекст
 
 What is the issue that we're seeing that is motivating this decision or change?
@@ -71,6 +87,58 @@ What is the issue that we're seeing that is motivating this decision or change?
 What is the change that we're proposing and/or doing?
 
 Включать в заголовок номер решения
+
+-----
+
+# 0004-Дата создания решения
+
+## Статус
+
+What is the status, such as proposed, accepted, rejected, deprecated, superseded, etc.?
+
+accepted
+
+## Дата создания
+
+12.01.2020
+
+## Контекст
+
+What is the issue that we're seeing that is motivating this decision or change?
+
+Нужно помнить дату принятия решения, чтобы можно было сопоставить это решение с другими документами и планами разработки.
+
+## Решение
+
+What is the change that we're proposing and/or doing?
+
+Фиксировать время создания решения в самом решении.
+
+-----
+
+# 0005-Дата создания решения в русской культуре
+
+## Статус
+
+What is the status, such as proposed, accepted, rejected, deprecated, superseded, etc.?
+
+accepted
+
+## Дата создания
+
+12.01.2020
+
+## Контекст
+
+What is the issue that we're seeing that is motivating this decision or change?
+
+Записи проектных и архитектурных решений делаются для команды русскоязычных специалистов. Должен быть привычный формат дат в этих документах.
+
+## Решение
+
+What is the change that we're proposing and/or doing?
+
+Дату создания всегда выводить в русской культуре.
 
 -----
 

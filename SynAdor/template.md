@@ -6,13 +6,17 @@ What is the status, such as proposed, accepted, rejected, deprecated, superseded
 
 [$STATUS]
 
+## Дата создания
+
+[$CREATEDATE]
+
 ## Контекст
 
 What is the issue that we're seeing that is motivating this decision or change?
 
 [$CONTEXT]
 
-## Decision
+## Решение
 
 What is the change that we're proposing and/or doing?
 
