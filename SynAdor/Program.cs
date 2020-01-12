@@ -82,6 +82,8 @@ namespace SynAdor
             var contentTableSb = new StringBuilder();
             var sb = new StringBuilder();
 
+            contentTableSb.AppendLine("# Содержание");
+            contentTableSb.AppendLine();
             foreach (var adrFile in adrFiles)
             {
                 if (adrFile.ToUpperInvariant().StartsWith("REPORT"))
@@ -94,10 +96,13 @@ namespace SynAdor
                 var fileContentLines = fileContent.Split("\r\n");
 
                 var title = fileContentLines[0].TrimStart('#').Trim();
-                var anchor = title.ToLowerInvariant().Replace(" ", "_");
+                var anchor = title.ToLowerInvariant().Replace(" ", "-");
                 contentTableSb.AppendLine($"[{title}](#{anchor})");
+                contentTableSb.AppendLine();
 
                 sb.AppendLine(fileContent);
+                sb.AppendLine();
+                sb.AppendLine("-----");
                 sb.AppendLine();
             }
 
