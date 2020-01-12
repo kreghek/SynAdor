@@ -61,11 +61,52 @@ namespace SynAdor
                         FinishRecord(waveIn);
                         break;
 
+                    case "A":
+                    case "ACTUAL":
+
+                        ProcessActualReport(adrRepositoryPath);
+
+                        break;
+
                     case "Q":
                     case "QUIT":
                         return;
                 }
             }
+        }
+
+        private static void ProcessActualReport(string adrRepositoryPath)
+        {
+            var adrFiles = Directory.GetFiles(adrRepositoryPath, "*.md");
+
+            var contentTableSb = new StringBuilder();
+            var sb = new StringBuilder();
+
+            foreach (var adrFile in adrFiles)
+            {
+                if (adrFile.ToUpperInvariant().StartsWith("REPORT"))
+                {
+                    // Игнорируем файлы отчёты, потому что мы и делаем отчёт.
+                    continue;
+                }
+
+                var fileContent = File.ReadAllText(adrFile);
+                var fileContentLines = fileContent.Split("\r\n");
+
+                var title = fileContentLines[0].TrimStart('#').Trim();
+                var anchor = title.ToLowerInvariant().Replace(" ", "_");
+                contentTableSb.AppendLine($"[{title}](#{anchor})");
+
+                sb.AppendLine(fileContent);
+                sb.AppendLine();
+            }
+
+            var totalSb = new StringBuilder();
+            totalSb.AppendLine(contentTableSb.ToString());
+            totalSb.AppendLine();
+            totalSb.AppendLine(sb.ToString());
+
+            File.WriteAllText(Path.Combine(adrRepositoryPath, "reports", "report-actual.md"), totalSb.ToString());
         }
 
         private static void HandleWaveIn(WaveInEvent waveIn)
@@ -173,60 +214,7 @@ namespace SynAdor
         {
             Console.WriteLine("Title:");
 
-            var cts = new CancellationTokenSource();
-            var ct = cts.Token;
-
-            var keyboardTask = Task.Run(() =>
-            {
-                var ret = Console.ReadLine();
-                cts.Cancel();
-                return ret;
-            });
-
-            var voiceTask = Task.Run(() =>
-            {
-                while (true)
-                {
-                    ct.ThrowIfCancellationRequested();
-
-                    //var recordStarted = false;
-                    //Task<string> recTask = null;
-
-                    //while (Console.ReadKey(intercept: true).Key == ConsoleKey.A && Console.KeyAvailable)
-                    //{
-                    //    if (!recordStarted)
-                    //    {
-                    //        recTask = StartRecord(outputFilePath, waveIn);
-                    //    }
-
-                    //    recordStarted = true;
-                    //}
-
-                    //if (recordStarted)
-                    //{
-                    //    FinishRecord(waveIn);
-
-                    //    if (recTask != null)
-                    //    {
-                    //        Console.Write(recTask.Result);
-                    //    }
-                    //}
-                    ConsoleKeyInfo cki;
-                    do
-                    {
-                        cki = Console.ReadKey();
-                        Console.Write(" --- You pressed ");
-                        if ((cki.Modifiers & ConsoleModifiers.Alt) != 0) Console.Write("ALT+");
-                        if ((cki.Modifiers & ConsoleModifiers.Shift) != 0) Console.Write("SHIFT+");
-                        if ((cki.Modifiers & ConsoleModifiers.Control) != 0) Console.Write("CTL+");
-                        Console.WriteLine(cki.Key.ToString());
-                    } while (cki.Key != ConsoleKey.Escape);
-                }
-            }, ct);
-
-            var title = keyboardTask.Result;
-
-            
+            var title = Console.ReadLine();
 
             var sanitizedTitle = title.ToLower().Trim().Replace(" ", "_");
             if (sanitizedTitle.Length > MAX_TITLE_LENGTH)
@@ -243,7 +231,7 @@ namespace SynAdor
             File.Copy(templateFile, decisionFilePath);
 
             var fileContent = File.ReadAllText(decisionFilePath);
-            fileContent = fileContent.Replace("[$TITLE]", title);
+            fileContent = fileContent.Replace("[$TITLE]", $"{decisionNum:D4}-{title}");
 
             fileContent = fileContent.Replace("[$STATUS]", "accepted");
 
