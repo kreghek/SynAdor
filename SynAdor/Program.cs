@@ -28,6 +28,9 @@ namespace SynAdor
 
         static void Main(string[] args)
         {
+            _folderId = ArgumentHelper.GetProgramArgument(args, "folderid");
+            _apiToken = ArgumentHelper.GetProgramArgument(args, "yandexPassportOauthToken");
+
             var adrRepositoryPath = "decisions";
 
             var templateFile = "template.md";
@@ -89,7 +92,7 @@ namespace SynAdor
             {
                 var url = "https://iam.api.cloud.yandex.net/iam/v1/tokens";
 
-                var content = new StringContent("{\"yandexPassportOauthToken\":\"{" + _apiToken + "}\"}", System.Text.Encoding.UTF8, "application/json");
+                var content = new StringContent("{\"yandexPassportOauthToken\":\"" + _apiToken + "\"}", System.Text.Encoding.UTF8, "application/json");
                 var result = client.PostAsync(url, content).Result;
 
                 var resStr = await result.Content.ReadAsStringAsync();
@@ -107,14 +110,14 @@ namespace SynAdor
 
             using (var client = new HttpClient())
             {
-                var url = $"https://stt.api.cloud.yandex.net/speech/v1/stt:recognize?topic=general&folderId={_folderId}";
+                var url = $"https://stt.api.cloud.yandex.net/speech/v1/stt:recognize?topic=general&format=lpcm&sampleRateHertz=48000&folderId={_folderId}";
 
                 client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
                 client.DefaultRequestHeaders.TransferEncodingChunked = true;
 
                 ConvertAudioResult();
 
-                var data = File.ReadAllBytes("res.ogg");
+                var data = File.ReadAllBytes("res1.wav");
 
                 var audioContent = new ByteArrayContent(data);
 
@@ -128,9 +131,14 @@ namespace SynAdor
 
         private static void ConvertAudioResult()
         {
-            var pcmBytes = File.ReadAllBytes("res.wav");
-            var oggBytes = ConvertRawPCMFile(44100, 2, pcmBytes, PCMSample.SixteenBit, 44100, 2);
-            File.WriteAllBytes("res.ogg", oggBytes);
+            using (var reader = new WaveFileReader("res.wav"))
+            {
+                var outFormat = new WaveFormat(48000, 16, 1);
+                using (var conversionStream = new WaveFormatConversionStream(outFormat, reader))
+                {
+                    WaveFileWriter.CreateWaveFile("res1.wav", conversionStream);
+                }
+            }
         }
 
         private class AuthResult {
@@ -144,7 +152,8 @@ namespace SynAdor
 
         private static void StartRecord(string outputFilePath, WaveInEvent waveIn)
         {
-            writer = new WaveFileWriter(outputFilePath, waveIn.WaveFormat);
+            var format = new WaveFormat(8000, 16, 1);
+            writer = new WaveFileWriter(outputFilePath, format);
             waveIn.StartRecording();
         }
 
