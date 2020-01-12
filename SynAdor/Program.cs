@@ -55,6 +55,11 @@ namespace SynAdor
                         ProcessCreation(templateFile, adrRepositoryPath, "res.wav", waveIn);
                         break;
 
+                    case "J":
+                    case "REJECT":
+                        ProcessDecisionRejection(adrRepositoryPath);
+                        break;
+
                     case "S":
                         StartRecord("res.wav", waveIn);
                         break;
@@ -127,27 +132,44 @@ namespace SynAdor
 
         private static void ProcessDecisionRejection(string adrRepositoryPath)
         {
+            Console.WriteLine("Номер решения для отмены:");
             var targetDecisionNumString = Console.ReadLine();
 
             var targetDecisionNum = int.Parse(targetDecisionNumString);
 
             var decisionFileName = GetDecisionByNumber(adrRepositoryPath, targetDecisionNum);
 
+            Console.WriteLine("Номер причины отмены:");
             var causeDecisionNumString = Console.ReadLine();
 
             var causeDecisionNum = int.Parse(causeDecisionNumString);
 
-            ChangeStatusToRejected(decisionFileName, causeDecisionNum);
+            ChangeStatusToRejected(decisionFileName, causeDecisionNum, adrRepositoryPath);
+
+            Console.WriteLine($"Решение {targetDecisionNum:D4} отменено решением {causeDecisionNum:D4}");
         }
 
-        private static void ChangeStatusToRejected(string decisionFileName, int causeDecisionNum)
+        private static void ChangeStatusToRejected(string decisionFileName, int causeDecisionNum, string adrRepositoryPath)
         {
-            throw new NotImplementedException();
+            var content = File.ReadAllText(decisionFileName);
+
+            var fileContentLines = content.Split("\r\n", StringSplitOptions.RemoveEmptyEntries);
+
+            var status = fileContentLines[2].Trim();
+
+            var adrFiles = Directory.GetFiles(adrRepositoryPath, "*.md");
+            var causeDecisionFile = AdrNameHelper.FindByNumber(adrFiles, causeDecisionNum);
+
+            content = content.Replace(status, $"Отменено (причина: [{causeDecisionNum:D4}](#{causeDecisionFile}))");
+
+            File.WriteAllText(decisionFileName, content);
         }
 
         private static string GetDecisionByNumber(string adrRepositoryPath, int targetDecisionNum)
         {
-            
+            var adrFiles = Directory.GetFiles(adrRepositoryPath, "*.md");
+            var adrFile = AdrNameHelper.FindByNumber(adrFiles, targetDecisionNum);
+            return adrFile;
         }
 
         private static void HandleWaveIn(WaveInEvent waveIn)
@@ -274,7 +296,7 @@ namespace SynAdor
             var fileContent = File.ReadAllText(decisionFilePath);
             fileContent = fileContent.Replace("[$TITLE]", $"{decisionNum:D4}-{title}");
 
-            fileContent = fileContent.Replace("[$STATUS]", "accepted");
+            fileContent = fileContent.Replace("[$STATUS]", "Принято");
 
             fileContent = fileContent.Replace("[$CREATEDATE]", DateTime.Now.ToString("d", CultureInfo.GetCultureInfo("ru-RU")));
 
@@ -287,6 +309,8 @@ namespace SynAdor
             fileContent = fileContent.Replace("[$DECISION]", decisionText);
 
             File.WriteAllText(decisionFilePath, fileContent);
+
+            Console.WriteLine($"Новое решение {decisionFileName} создано.");
         }
 
         private static void WriteCommands()
@@ -302,7 +326,7 @@ namespace SynAdor
         {
             var adrFiles = Directory.GetFiles(adrRepositoryPath, "*.md");
 
-            return AdrNameHelper.CalcNumber(adrFiles);
+            return AdrNameHelper.GetMaxNumber(adrFiles);
         }
     }
 }
