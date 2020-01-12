@@ -105,7 +105,10 @@ namespace SynAdor
 
                 var title = fileContentLines[0].TrimStart('#').Trim();
                 var anchor = title.ToLowerInvariant().Replace(" ", "-");
-                contentTableSb.AppendLine($"[{title}](#{anchor})");
+
+                var createdDate = fileContentLines[4].Trim();
+
+                contentTableSb.AppendLine($"[{title} (от {createdDate})](#{anchor})");
                 contentTableSb.AppendLine();
 
                 sb.AppendLine(fileContent);
