@@ -65,7 +65,7 @@ namespace SynAdor
                     case "A":
                     case "ACTUAL":
 
-                        ProcessActualReport(adrRepositoryPath);
+                        ProcessReport(adrRepositoryPath);
 
                         break;
 
@@ -76,7 +76,7 @@ namespace SynAdor
             }
         }
 
-        private static void ProcessActualReport(string adrRepositoryPath)
+        private static void ProcessReport(string adrRepositoryPath, bool onlyActual)
         {
             var adrFiles = Directory.GetFiles(adrRepositoryPath, "*.md");
 
@@ -94,7 +94,7 @@ namespace SynAdor
                 }
 
                 var fileContent = File.ReadAllText(adrFile);
-                var fileContentLines = fileContent.Split("\r\n");
+                var fileContentLines = fileContent.Split("\r\n", StringSplitOptions.RemoveEmptyEntries);
 
                 var title = fileContentLines[0].TrimStart('#').Trim();
                 var anchor = title.ToLowerInvariant().Replace(" ", "-");
@@ -243,11 +243,11 @@ namespace SynAdor
 
             fileContent = fileContent.Replace("[$CREATEDATE]", DateTime.Now.ToString("d", CultureInfo.GetCultureInfo("ru-RU")));
 
-            Console.WriteLine("Context:");
+            Console.WriteLine("Контекст:");
             var context = Console.ReadLine();
             fileContent = fileContent.Replace("[$CONTEXT]", context);
 
-            Console.WriteLine("Decision:");
+            Console.WriteLine("Решение:");
             var decisionText = Console.ReadLine();
             fileContent = fileContent.Replace("[$DECISION]", decisionText);
 
@@ -256,9 +256,10 @@ namespace SynAdor
 
         private static void WriteCommands()
         {
-            Console.WriteLine("[C, create] - create new decision");
-            Console.WriteLine("[Q, quit] - close application");
-            Console.WriteLine("Enter command: ");
+            Console.WriteLine("[C, create] - создать новое решение");
+            Console.WriteLine("[A, actual] - отчёт по актуальным решениям");
+            Console.WriteLine("[Q, quit] - выход");
+            Console.WriteLine("Команда: ");
         }
 
         private static int CalcLastNumber(string adrRepositoryPath)

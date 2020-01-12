@@ -1,0 +1,1 @@
+XCOPY .\SynAdor\bin\Debug\netcoreapp3.1\decisions\* .\Docs\decisions\* /s /e /q /Y
