@@ -4,6 +4,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
+using System.Threading;
 using System.Threading.Tasks;
 using NAudio.Wave;
 using OggVorbisEncoder;
@@ -25,6 +26,8 @@ namespace SynAdor
         /// Там ссылка.
         /// </summary>
         private static string _apiToken;
+
+        private static TaskCompletionSource<string> _voiceRecordTcs;
 
         static void Main(string[] args)
         {
@@ -48,7 +51,7 @@ namespace SynAdor
                 {
                     case "C":
                     case "CREATE":
-                        ProcessCreation(templateFile, adrRepositoryPath);
+                        ProcessCreation(templateFile, adrRepositoryPath, "res.wav", waveIn);
                         break;
 
                     case "S":
@@ -126,6 +129,11 @@ namespace SynAdor
                 var resultStr = await result.Content.ReadAsStringAsync();
 
                 Console.WriteLine(resultStr);
+
+                if (_voiceRecordTcs != null)
+                {
+                    _voiceRecordTcs.SetResult(resultStr);
+                }
             }
         }
 
@@ -150,17 +158,76 @@ namespace SynAdor
             waveIn.StopRecording();
         }
 
-        private static void StartRecord(string outputFilePath, WaveInEvent waveIn)
+        private static Task<string> StartRecord(string outputFilePath, WaveInEvent waveIn)
         {
             var format = new WaveFormat(8000, 16, 1);
             writer = new WaveFileWriter(outputFilePath, format);
             waveIn.StartRecording();
+            
+            _voiceRecordTcs = new TaskCompletionSource<string>();
+            var task = _voiceRecordTcs.Task;
+            return task;
         }
 
-        private static void ProcessCreation(string templateFile, string adrRepositoryPath)
+        private static void ProcessCreation(string templateFile, string adrRepositoryPath, string outputFilePath, WaveInEvent waveIn)
         {
             Console.WriteLine("Title:");
-            var title = Console.ReadLine();
+
+            var cts = new CancellationTokenSource();
+            var ct = cts.Token;
+
+            var keyboardTask = Task.Run(() =>
+            {
+                var ret = Console.ReadLine();
+                cts.Cancel();
+                return ret;
+            });
+
+            var voiceTask = Task.Run(() =>
+            {
+                while (true)
+                {
+                    ct.ThrowIfCancellationRequested();
+
+                    //var recordStarted = false;
+                    //Task<string> recTask = null;
+
+                    //while (Console.ReadKey(intercept: true).Key == ConsoleKey.A && Console.KeyAvailable)
+                    //{
+                    //    if (!recordStarted)
+                    //    {
+                    //        recTask = StartRecord(outputFilePath, waveIn);
+                    //    }
+
+                    //    recordStarted = true;
+                    //}
+
+                    //if (recordStarted)
+                    //{
+                    //    FinishRecord(waveIn);
+
+                    //    if (recTask != null)
+                    //    {
+                    //        Console.Write(recTask.Result);
+                    //    }
+                    //}
+                    ConsoleKeyInfo cki;
+                    do
+                    {
+                        cki = Console.ReadKey();
+                        Console.Write(" --- You pressed ");
+                        if ((cki.Modifiers & ConsoleModifiers.Alt) != 0) Console.Write("ALT+");
+                        if ((cki.Modifiers & ConsoleModifiers.Shift) != 0) Console.Write("SHIFT+");
+                        if ((cki.Modifiers & ConsoleModifiers.Control) != 0) Console.Write("CTL+");
+                        Console.WriteLine(cki.Key.ToString());
+                    } while (cki.Key != ConsoleKey.Escape);
+                }
+            }, ct);
+
+            var title = keyboardTask.Result;
+
+            
+
             var sanitizedTitle = title.ToLower().Trim().Replace(" ", "_");
             if (sanitizedTitle.Length > MAX_TITLE_LENGTH)
             {
