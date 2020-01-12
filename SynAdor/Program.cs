@@ -65,7 +65,7 @@ namespace SynAdor
                     case "A":
                     case "ACCEPTED":
 
-                        ProcessReport(adrRepositoryPath, onlyAccepted: true);
+                        ProcessReportCreation(adrRepositoryPath, onlyAccepted: true);
 
                         break;
 
@@ -76,7 +76,7 @@ namespace SynAdor
             }
         }
 
-        private static void ProcessReport(string adrRepositoryPath, bool onlyAccepted)
+        private static void ProcessReportCreation(string adrRepositoryPath, bool onlyAccepted)
         {
             var adrFiles = Directory.GetFiles(adrRepositoryPath, "*.md");
 
@@ -123,6 +123,31 @@ namespace SynAdor
             totalSb.AppendLine(sb.ToString());
 
             File.WriteAllText(Path.Combine(adrRepositoryPath, "reports", "report-actual.md"), totalSb.ToString());
+        }
+
+        private static void ProcessDecisionRejection(string adrRepositoryPath)
+        {
+            var targetDecisionNumString = Console.ReadLine();
+
+            var targetDecisionNum = int.Parse(targetDecisionNumString);
+
+            var decisionFileName = GetDecisionByNumber(targetDecisionNum);
+
+            var causeDecisionNumString = Console.ReadLine();
+
+            var causeDecisionNum = int.Parse(causeDecisionNumString);
+
+            ChangeStatusToRejected(decisionFileName, causeDecisionNum);
+        }
+
+        private static void ChangeStatusToRejected(string decisionFileName, int causeDecisionNum)
+        {
+            throw new NotImplementedException();
+        }
+
+        private static string GetDecisionByNumber(int targetDecisionNum)
+        {
+            throw new NotImplementedException();
         }
 
         private static void HandleWaveIn(WaveInEvent waveIn)
@@ -267,7 +292,8 @@ namespace SynAdor
         private static void WriteCommands()
         {
             Console.WriteLine("[C, create] - создать новое решение");
-            Console.WriteLine("[A, actual] - отчёт по актуальным решениям");
+            Console.WriteLine("[A, actual] - отчёт по принятым решениям");
+            Console.WriteLine("[J, REJECT] - отмена решения");
             Console.WriteLine("[Q, quit] - выход");
             Console.WriteLine("Команда: ");
         }
