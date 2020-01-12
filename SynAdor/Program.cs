@@ -131,7 +131,7 @@ namespace SynAdor
 
             var targetDecisionNum = int.Parse(targetDecisionNumString);
 
-            var decisionFileName = GetDecisionByNumber(targetDecisionNum);
+            var decisionFileName = GetDecisionByNumber(adrRepositoryPath, targetDecisionNum);
 
             var causeDecisionNumString = Console.ReadLine();
 
@@ -145,9 +145,9 @@ namespace SynAdor
             throw new NotImplementedException();
         }
 
-        private static string GetDecisionByNumber(int targetDecisionNum)
+        private static string GetDecisionByNumber(string adrRepositoryPath, int targetDecisionNum)
         {
-            throw new NotImplementedException();
+            
         }
 
         private static void HandleWaveIn(WaveInEvent waveIn)
