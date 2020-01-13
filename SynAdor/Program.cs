@@ -99,7 +99,7 @@ namespace SynAdor
                 }
 
                 var fileContent = File.ReadAllText(adrFile);
-                var fileContentLines = fileContent.Split("\r\n", StringSplitOptions.RemoveEmptyEntries);
+                var fileContentLines = fileContent.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
 
                 // Отфильтровываем только принятые (accepted)
                 var status = fileContentLines[2].Trim().ToUpperInvariant();
@@ -108,7 +108,8 @@ namespace SynAdor
                     continue;
                 }
 
-                var title = fileContentLines[0].TrimStart('#').Trim();
+                // Удаляем в конце точку, чтобы корректно работал переход по ссылке
+                var title = fileContentLines[0].TrimStart('#').Trim().TrimEnd('.');
                 var anchor = title.ToLowerInvariant().Replace(" ", "-");
 
                 var createdDate = fileContentLines[4].Trim();
@@ -288,7 +289,7 @@ namespace SynAdor
 
             var title = Console.ReadLine();
 
-            var sanitizedTitle = title.ToLower().Trim().Replace(" ", "_");
+            var sanitizedTitle = title.ToLower().Trim().Replace(" ", "_").TrimEnd('.');
             if (sanitizedTitle.Length > MAX_TITLE_LENGTH)
             {
                 sanitizedTitle = sanitizedTitle.Substring(0, MAX_TITLE_LENGTH);
