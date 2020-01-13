@@ -14,7 +14,11 @@ namespace SynAdor
     class Program
     {
         private const int MAX_TITLE_LENGTH = 30;
+
         private static WaveFileWriter writer;
+
+        private const string ACCEPTED_STATUS = "Принято";
+        private const string PROPOSED_STATUS = "На рассмотрении";
 
         /// <summary>
         /// Получаем по https://console.cloud.yandex.ru/folders
@@ -69,9 +73,12 @@ namespace SynAdor
 
                     case "A":
                     case "ACCEPTED":
+                        ProcessReportCreation(_adrRepositoryPath, filterStatus: ACCEPTED_STATUS, "accepted");
+                        break;
 
-                        ProcessReportCreation(_adrRepositoryPath, onlyAccepted: true);
-
+                    case "P":
+                    case "PROPOSED":
+                        ProcessReportCreation(_adrRepositoryPath, filterStatus: PROPOSED_STATUS, "proposed");
                         break;
 
                     case "Q":
@@ -81,7 +88,7 @@ namespace SynAdor
             }
         }
 
-        private static void ProcessReportCreation(string adrRepositoryPath, bool onlyAccepted)
+        private static void ProcessReportCreation(string adrRepositoryPath, string filterStatus, string reportSid)
         {
             var adrFiles = Directory.GetFiles(adrRepositoryPath, "*.md");
 
@@ -102,8 +109,8 @@ namespace SynAdor
                 var fileContentLines = fileContent.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
 
                 // Отфильтровываем только принятые (accepted)
-                var status = fileContentLines[2].Trim().ToUpperInvariant();
-                if (onlyAccepted && status != "ПРИНЯТО")
+                var status = fileContentLines[2].Trim();
+                if (filterStatus != null && !string.Equals(status, filterStatus, StringComparison.OrdinalIgnoreCase))
                 {
                     continue;
                 }
@@ -134,7 +141,7 @@ namespace SynAdor
                 Directory.CreateDirectory(reportDirPath);
             }
 
-            var reportFilePath = Path.Combine(reportDirPath, "report-actual.md");
+            var reportFilePath = Path.Combine(reportDirPath, $"report-{reportSid}.md");
 
             File.WriteAllText(reportFilePath, totalSb.ToString());
         }
@@ -315,7 +322,7 @@ namespace SynAdor
             var fileContent = File.ReadAllText(decisionFilePath);
             fileContent = fileContent.Replace("[$TITLE]", $"{decisionNum:D4}-{title}");
 
-            fileContent = fileContent.Replace("[$STATUS]", "Принято");
+            fileContent = fileContent.Replace("[$STATUS]", ACCEPTED_STATUS);
 
             fileContent = fileContent.Replace("[$CREATEDATE]", DateTime.Now.ToString("d", CultureInfo.GetCultureInfo("ru-RU")));
 
@@ -334,11 +341,21 @@ namespace SynAdor
 
         private static void WriteCommands()
         {
+            WriteFullWidthLine();
             Console.WriteLine("[C, create] - создать новое решение");
-            Console.WriteLine("[A, actual] - отчёт по принятым решениям");
-            Console.WriteLine("[J, REJECT] - отмена решения");
+            Console.WriteLine("[A, accepted] - отчёт по принятым решениям");
+            Console.WriteLine("[P, proposed] - отчёт по рассматриваемым решениям");
+            Console.WriteLine("[J, reject] - отмена решения");
             Console.WriteLine("[Q, quit] - выход");
-            Console.WriteLine("Команда: ");
+            WriteFullWidthLine();
+
+            Console.WriteLine();
+            Console.Write("Команда: ");
+        }
+
+        private static void WriteFullWidthLine()
+        {
+            Console.WriteLine(new string('=', 80));
         }
 
         private static int CalcLastNumber(string adrRepositoryPath)
