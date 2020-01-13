@@ -8,6 +8,10 @@
 
 [$CREATEDATE]
 
+## Авторы
+
+[$AUTHORS]
+
 ## Контекст
 
 [$CONTEXT]

@@ -33,6 +33,8 @@ namespace SynAdor
 
         private static string _adrRepositoryPath;
 
+        private static string _authors;
+
         private static TaskCompletionSource<string> _voiceRecordTcs;
 
         static void Main(string[] args)
@@ -40,6 +42,7 @@ namespace SynAdor
             _folderId = ArgumentHelper.GetProgramArgument(args, "folderid");
             _apiToken = ArgumentHelper.GetProgramArgument(args, "yandexPassportOauthToken");
             _adrRepositoryPath = ArgumentHelper.GetProgramArgument(args, "adrRepositoryPath", "decisions");
+            _authors = ArgumentHelper.GetProgramArgument(args, "authors");
 
             var templateFile = "template.md";
 
@@ -333,6 +336,9 @@ namespace SynAdor
             fileContent = fileContent.Replace("[$STATUS]", ACCEPTED_STATUS);
 
             fileContent = fileContent.Replace("[$CREATEDATE]", DateTime.Now.ToString("d", CultureInfo.GetCultureInfo("ru-RU")));
+
+            var normalizedAuthors = _authors ?? string.Empty;
+            fileContent = fileContent.Replace("[$AUTHORS]", normalizedAuthors);
 
             Console.WriteLine("Контекст:");
             var context = Console.ReadLine();

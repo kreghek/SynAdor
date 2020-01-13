@@ -46,7 +46,7 @@ namespace SynAdor
                 {
                     if (components.Length >= 2)
                     {
-                        if (string.IsNullOrEmpty(defaultValue))
+                        if (string.IsNullOrEmpty(components[1]))
                         {
                             return defaultValue;
                         }
