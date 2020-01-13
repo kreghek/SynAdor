@@ -56,12 +56,26 @@ namespace SynAdor
                 {
                     case "C":
                     case "CREATE":
+                    case "1":
                         ProcessCreation(templateFile, _adrRepositoryPath, "res.wav", waveIn);
                         break;
 
                     case "J":
                     case "REJECT":
+                    case "2":
                         ProcessDecisionRejection(_adrRepositoryPath);
+                        break;
+
+                    case "A":
+                    case "ACCEPTED":
+                    case "11":
+                        ProcessReportCreation(_adrRepositoryPath, filterStatus: ACCEPTED_STATUS, "accepted");
+                        break;
+
+                    case "P":
+                    case "PROPOSED":
+                    case "12":
+                        ProcessReportCreation(_adrRepositoryPath, filterStatus: PROPOSED_STATUS, "proposed");
                         break;
 
                     case "S":
@@ -71,19 +85,13 @@ namespace SynAdor
                         FinishRecord(waveIn);
                         break;
 
-                    case "A":
-                    case "ACCEPTED":
-                        ProcessReportCreation(_adrRepositoryPath, filterStatus: ACCEPTED_STATUS, "accepted");
-                        break;
-
-                    case "P":
-                    case "PROPOSED":
-                        ProcessReportCreation(_adrRepositoryPath, filterStatus: PROPOSED_STATUS, "proposed");
-                        break;
-
                     case "Q":
                     case "QUIT":
                         return;
+
+                    default:
+                        Console.WriteLine("[x] Неизвестная команда");
+                        break;
                 }
             }
         }
@@ -342,10 +350,10 @@ namespace SynAdor
         private static void WriteCommands()
         {
             WriteFullWidthLine();
-            Console.WriteLine("[C, create] - создать новое решение");
-            Console.WriteLine("[A, accepted] - отчёт по принятым решениям");
-            Console.WriteLine("[P, proposed] - отчёт по рассматриваемым решениям");
-            Console.WriteLine("[J, reject] - отмена решения");
+            Console.WriteLine("[1, C, create] - создать новое решение");
+            Console.WriteLine("[2, J, reject] - отмена решения");
+            Console.WriteLine("[11, A, accepted] - отчёт по принятым решениям");
+            Console.WriteLine("[12, P, proposed] - отчёт по рассматриваемым решениям");
             Console.WriteLine("[Q, quit] - выход");
             WriteFullWidthLine();
 
