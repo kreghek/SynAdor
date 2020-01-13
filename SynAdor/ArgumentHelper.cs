@@ -28,6 +28,17 @@ namespace SynAdor
         /// <returns> Возвращает строковое значение аргумента. Или null, если аргумента нет. </returns>
         public static string GetProgramArgument(string[] args, string testArg)
         {
+            return GetProgramArgument(args, testArg, defaultValue: default);
+        }
+
+        /// <summary>
+        /// Возвращает значение аргумента.
+        /// </summary>
+        /// <param name="args"> Все агрументы приложения. </param>
+        /// <param name="testArg"> Аргумент, значение которого требуется извлечь. Без учёта регистра. </param>
+        /// <returns> Возвращает строковое значение аргумента. Или null, если аргумента нет. </returns>
+        public static string GetProgramArgument(string[] args, string testArg, string defaultValue)
+        {
             foreach (var arg in args)
             {
                 var components = arg.Split(new[] { '=' }, StringSplitOptions.RemoveEmptyEntries);
@@ -35,12 +46,19 @@ namespace SynAdor
                 {
                     if (components.Length >= 2)
                     {
-                        return components[1];
+                        if (string.IsNullOrEmpty(defaultValue))
+                        {
+                            return defaultValue;
+                        }
+                        else
+                        {
+                            return components[1];
+                        }
                     }
                 }
             }
 
-            return null;
+            return defaultValue;
         }
     }
 }

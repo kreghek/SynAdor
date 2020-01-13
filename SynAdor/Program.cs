@@ -27,14 +27,15 @@ namespace SynAdor
         /// </summary>
         private static string _apiToken;
 
+        private static string _adrRepositoryPath;
+
         private static TaskCompletionSource<string> _voiceRecordTcs;
 
         static void Main(string[] args)
         {
             _folderId = ArgumentHelper.GetProgramArgument(args, "folderid");
             _apiToken = ArgumentHelper.GetProgramArgument(args, "yandexPassportOauthToken");
-
-            var adrRepositoryPath = "decisions";
+            _adrRepositoryPath = ArgumentHelper.GetProgramArgument(args, "adrRepositoryPath", "decisions");
 
             var templateFile = "template.md";
 
@@ -51,12 +52,12 @@ namespace SynAdor
                 {
                     case "C":
                     case "CREATE":
-                        ProcessCreation(templateFile, adrRepositoryPath, "res.wav", waveIn);
+                        ProcessCreation(templateFile, _adrRepositoryPath, "res.wav", waveIn);
                         break;
 
                     case "J":
                     case "REJECT":
-                        ProcessDecisionRejection(adrRepositoryPath);
+                        ProcessDecisionRejection(_adrRepositoryPath);
                         break;
 
                     case "S":
@@ -69,7 +70,7 @@ namespace SynAdor
                     case "A":
                     case "ACCEPTED":
 
-                        ProcessReportCreation(adrRepositoryPath, onlyAccepted: true);
+                        ProcessReportCreation(_adrRepositoryPath, onlyAccepted: true);
 
                         break;
 
@@ -161,14 +162,16 @@ namespace SynAdor
         {
             var content = File.ReadAllText(decisionFileName);
 
-            var fileContentLines = content.Split("\r\n", StringSplitOptions.RemoveEmptyEntries);
+            var fileContentLines = content.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
 
             var status = fileContentLines[2].Trim();
 
             var adrFiles = Directory.GetFiles(adrRepositoryPath, "*.md");
             var causeDecisionFile = AdrNameHelper.FindByNumber(adrFiles, causeDecisionNum);
 
-            var causeDecisionFileTitle = causeDecisionFile.Replace("decisions\\", string.Empty);
+            var fileInfo = new FileInfo(causeDecisionFile);
+
+            var causeDecisionFileTitle = fileInfo.Name;
             content = content.Replace(status, $"Отменено (причина: [{causeDecisionFileTitle}]({causeDecisionFileTitle}))");
 
             File.WriteAllText(decisionFileName, content);
