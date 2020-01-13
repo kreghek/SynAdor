@@ -1,3 +1,5 @@
+![GitHub commit activity](https://img.shields.io/github/commit-activity/m/kreghek/SynAdor)
+
 # SynAdor
 Приложение для управления ADR. Должно помогать при проектировании и разработке крупных систем.
 
@@ -24,4 +26,8 @@
 | adrRepositoryPath | Полный или относительный путь к папке, где будут храниться решения. |
 | authors           | Участники, принимающие решения.                                     |
 
-Пример запуска: SynAdor.exe adrReporitoryPath="../Docs/decisions" authors="kreghek"
+Примеры запуска:
+
+`SynAdor.exe adrReporitoryPath="../Docs/decisions" authors="kreghek"`
+
+`SynAdor.exe adrReporitoryPath="../Docs/decisions" authors="kreghek, anybody else"`
