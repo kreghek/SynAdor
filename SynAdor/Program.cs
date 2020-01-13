@@ -127,7 +127,15 @@ namespace SynAdor
             totalSb.AppendLine();
             totalSb.AppendLine(sb.ToString());
 
-            File.WriteAllText(Path.Combine(adrRepositoryPath, "reports", "report-actual.md"), totalSb.ToString());
+            var reportDirPath = Path.Combine(adrRepositoryPath, "reports");
+            if (!Directory.Exists(reportDirPath))
+            {
+                Directory.CreateDirectory(reportDirPath);
+            }
+
+            var reportFilePath = Path.Combine(reportDirPath, "report-actual.md");
+
+            File.WriteAllText(reportFilePath, totalSb.ToString());
         }
 
         private static void ProcessDecisionRejection(string adrRepositoryPath)
@@ -292,6 +300,13 @@ namespace SynAdor
 
             var decisionFileName = $"{decisionNum:D4}-{sanitizedTitle}.md";
             var decisionFilePath = Path.Combine(adrRepositoryPath, decisionFileName);
+
+            if (!Directory.Exists(adrRepositoryPath))
+            {
+                // Если это новый репозиторий, то папки с решениями не будет.
+                // Нужно её создать, чтобы выполнилось корректное копирование.
+                Directory.CreateDirectory(adrRepositoryPath);
+            }
             File.Copy(templateFile, decisionFilePath);
 
             var fileContent = File.ReadAllText(decisionFilePath);
@@ -308,7 +323,7 @@ namespace SynAdor
             Console.WriteLine("Решение:");
             var decisionText = Console.ReadLine();
             fileContent = fileContent.Replace("[$DECISION]", decisionText);
-
+            
             File.WriteAllText(decisionFilePath, fileContent);
 
             Console.WriteLine($"Новое решение {decisionFileName} создано.");
@@ -325,6 +340,14 @@ namespace SynAdor
 
         private static int CalcLastNumber(string adrRepositoryPath)
         {
+            if (!Directory.Exists(adrRepositoryPath))
+            {
+                // Если директории с репой решений еще нет,
+                // то предполагаем, что это новый репозиторий.
+                // Соответственно, последнее решение имеет номер 0.
+                return 0;
+            }
+
             var adrFiles = Directory.GetFiles(adrRepositoryPath, "*.md");
 
             return AdrNameHelper.GetMaxNumber(adrFiles);
