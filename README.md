@@ -1,4 +1,4 @@
-![GitHub Workflow Status](https://img.shields.io/github/workflow/status/kreghek/SynAdor/.NET Core)
+![GitHub Workflow Status](https://img.shields.io/github/workflow/status/kreghek/SynAdor/.NET%20Core)
 ![GitHub commit activity](https://img.shields.io/github/commit-activity/m/kreghek/SynAdor)
 
 # SynAdor
