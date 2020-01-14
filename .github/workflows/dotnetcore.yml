@@ -26,10 +26,3 @@ jobs:
         name: SynAdor
         # Directory containing files to upload
         path: ./app
-    - name: Upload artifact full
-      uses: actions/upload-artifact@v1.0.0
-      with:
-        # Artifact name
-        name: SynAdor_Full
-        # Directory containing files to upload
-        path: ./app_full
