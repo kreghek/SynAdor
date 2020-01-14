@@ -17,8 +17,6 @@ jobs:
       run: dotnet build --configuration Release
     - name: Publish
       run: dotnet publish --configuration Release --runtime win-x64 --output ./app
-    - name: Publish Full
-      run: dotnet publish --configuration Release --runtime win-x64 --self-contained --output ./app_full
     - name: Upload artifact
       uses: actions/upload-artifact@v1.0.0
       with:
