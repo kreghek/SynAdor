@@ -44,6 +44,11 @@ namespace SynAdor
             _adrRepositoryPath = ArgumentHelper.GetProgramArgument(args, "adrRepositoryPath", "decisions");
             _authors = ArgumentHelper.GetProgramArgument(args, "authors");
 
+            if (_authors == null)
+            {
+                SetAuthors();
+            }
+
             var templateFile = "template.md";
 
             var waveIn = new WaveInEvent();
@@ -95,6 +100,50 @@ namespace SynAdor
                     default:
                         Console.WriteLine("[x] Неизвестная команда");
                         break;
+                }
+            }
+        }
+
+        private static void SetAuthors()
+        {
+            const string SETTINGS_FILE_NAME = "settings";
+            if (!File.Exists(SETTINGS_FILE_NAME))
+            {
+                File.CreateText(SETTINGS_FILE_NAME);
+            }
+
+            _authors = File.ReadAllText(SETTINGS_FILE_NAME);
+
+            if (string.IsNullOrWhiteSpace(_authors))
+            {
+                // Если в настройках нет авторов, то запрашиваем ввод авторов сессии согласования у пользователя.
+                Console.WriteLine("Авторы сессии согласования:");
+                _authors = Console.ReadLine().Replace("\n", string.Empty).Replace("\r", string.Empty).Trim();
+                File.WriteAllText(SETTINGS_FILE_NAME, _authors);
+            }
+            else
+            {
+                // Если в настройках есть авторы, то подтверждаем их.
+                Console.WriteLine($"Выбраны авторы согласования: {_authors}.");
+                Console.WriteLine("Использовать этих авторов [y/n]: ");
+                while (true)
+                {
+                    var choice = Console.ReadLine();
+
+                    if (choice.Equals("y", StringComparison.CurrentCultureIgnoreCase))
+                    {
+                        break;
+                    }
+                    else if (choice.Equals("n", StringComparison.CurrentCultureIgnoreCase))
+                    {
+                        Console.WriteLine("Авторы сессии согласования:");
+                        _authors = Console.ReadLine().Replace("\n", string.Empty).Replace("\r", string.Empty).Trim();
+                        break;
+                    }
+                    else
+                    {
+                        Console.WriteLine("Некорректный выбор.");
+                    }
                 }
             }
         }
